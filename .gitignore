@@ -1,0 +1,21 @@
+# 生成物：抓取数据与日报
+data/
+reports/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 探测/临时
+_probe/
+*.log
