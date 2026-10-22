@@ -430,6 +430,10 @@ def analyze(items, status):
     import explainer
     category_analysis = explainer.explain(clusters, stats)
 
+    # 个性化：对你有用（投资/理财/副业视角）
+    import focus
+    focus_result = focus.analyze_focus(clusters)
+
     return {
         "stats": stats,
         "clusters": clusters,
@@ -437,4 +441,5 @@ def analyze(items, status):
         "insights": [{"title": t, "text": x} for t, x in insights],
         "summary": summary,
         "category_analysis": category_analysis,
+        "focus": focus_result,
     }

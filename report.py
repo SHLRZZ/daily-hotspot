@@ -174,6 +174,46 @@ td.tg{width:52px;text-align:right}
 .lab.n{background:#eaf1fd;color:#2563eb}
 .lab.g{background:#eef3ee;color:#4a6b52}
 
+/* ---------- focus (对你有什么用) ---------- */
+.focus-sec{background:linear-gradient(180deg,#fffdf4,#fff);border:1px solid #f0e6c8;
+  border-radius:var(--radius);padding:22px 24px 20px;box-shadow:0 1px 2px rgba(20,30,45,.05)}
+.focus-tagline{font-size:12.5px;color:#a8822f;margin:-6px 0 16px;font-weight:600}
+.advice{background:#fbf7ea;border:1px solid #f0e6c8;border-left:3px solid #c9a227;
+  border-radius:10px;padding:15px 18px;margin-bottom:16px}
+.advice p{font-size:13.5px;color:#4a4028;line-height:1.82;margin-bottom:8px}
+.advice p:last-child{margin-bottom:0}
+.signal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.sig-card{border-radius:12px;padding:14px 16px;border:1px solid #eee}
+.sig-card h3{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sig-card h3 i{font-style:normal;font-size:11px;background:#fff;border-radius:20px;
+  padding:0 8px;font-weight:700;font-variant-numeric:tabular-nums}
+.sig-card .si{font-size:12.5px;color:#3d4a58;line-height:1.5;margin-bottom:9px}
+.sig-card .si:last-child{margin-bottom:0}
+.sig-card .si .st{font-weight:700}
+.sig-card .si .sc{display:block;font-size:11.5px;color:#9aa4b0;margin-top:2px}
+.sig-card .si .sec{font-size:11px;color:#9a7416;background:rgba(255,255,255,.7);
+  padding:1px 7px;border-radius:20px;font-weight:600}
+.sig-card .empty{font-size:12px;color:#a9b2bd}
+.sig-card.opp{background:#fdf1ee;border-color:#f6d8d2}
+.sig-card.opp h3{color:#b4402c}
+.sig-card.risk{background:#eef6f0;border-color:#d3e6da}
+.sig-card.risk h3{color:#2f7d55}
+.sig-card.bench{background:#eef3fd;border-color:#d6e2f7}
+.sig-card.bench h3{color:#2563eb}
+.sig-card.idea{background:#fbf6ea;border-color:#efe0bd}
+.sig-card.idea h3{color:#9a7416}
+.fr-title{font-size:12px;letter-spacing:.08em;color:#a8822f;font-weight:700;margin:0 0 8px}
+.focus-rank{display:flex;flex-direction:column;gap:5px}
+.fr{display:flex;gap:10px;align-items:center;font-size:13px;padding:7px 10px;border-radius:8px}
+.fr:hover{background:#faf6ec}
+.fr .n{flex:none;width:22px;color:#c9a227;font-weight:800;font-variant-numeric:tabular-nums}
+.fr .t{flex:1;font-weight:600;color:#33404e;min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.fr .sig{flex:none;font-size:11px;color:#b4402c}
+.fr .sec{flex:none;font-size:11px;color:#9a7416;background:#fbf6ea;padding:1px 7px;border-radius:20px}
+.fr .fs{flex:none;color:#a9b2bd;font-variant-numeric:tabular-nums;font-size:12px}
+.fr .fs b{color:#8a6d1a;font-weight:700}
+
 /* ---------- footer ---------- */
 footer{margin-top:46px;padding-top:22px;border-top:1px solid var(--line);
   font-size:12px;color:#9aa4b0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
@@ -185,6 +225,7 @@ footer b{color:#6b7684;font-weight:600}
   .kpis{grid-template-columns:repeat(2,1fr)}
   .plats{grid-template-columns:1fr}
   .insights{grid-template-columns:1fr}
+  .signal-grid{grid-template-columns:1fr}
   .summary{padding:20px 22px}
 }
 @media print{
@@ -349,6 +390,48 @@ def render(payload, out_dir, top=12, prev=None):
         catwhy = f'<section><h2><span class="idx">06</span> 为什么火 · 大白话解读</h2>'
         catwhy += f'<div class="catwhy">{"".join(rows)}</div></section>'
 
+    # --- 对你有什么用（个性化：投资/副业视角） ---
+    focus_html = ""
+    fc = payload.get("focus")
+    if fc:
+        advice = "".join(f'<p>{esc(p)}</p>' for p in fc.get("advice", []))
+
+        def sig_card(cls, title, items):
+            if not items:
+                return (f'<div class="sig-card {cls}"><h3>{title}<i>0</i></h3>'
+                        f'<div class="empty">今日暂无</div></div>')
+            body = ""
+            for it in items:
+                sec = f'<span class="sec">{esc(it["sector"])}</span>' if it.get("sector") else ""
+                body += (f'<div class="si"><span class="st">{esc(it["title"])}</span> {sec}'
+                         f'<span class="sc">{esc(it["reason"])}</span></div>')
+            return f'<div class="sig-card {cls}"><h3>{title}<i>{len(items)}</i></h3>{body}</div>'
+
+        opp_c = sig_card("opp", "机会信号", fc.get("opportunities", []))
+        risk_c = sig_card("risk", "风险预警", fc.get("risks", []))
+        bench_c = sig_card("bench", "对标案例", fc.get("benchmarks", []))
+        idea_c = sig_card("idea", "可落地点子", fc.get("ideas", []))
+
+        rank_rows = []
+        for i, it in enumerate(fc.get("relevant", []), 1):
+            sig = "、".join(it.get("signals", []))
+            sec = f'<span class="sec">{esc(it["sector"])}</span>' if it.get("sector") else ""
+            sigs = f'<span class="sig">{esc(sig)}</span>' if sig else ""
+            rank_rows.append(
+                f'<div class="fr"><span class="n">{i:02d}</span>'
+                f'<span class="t">{esc(it["title"])}</span>{sec}{sigs}'
+                f'<span class="fs">相关度 <b>{it["focus_score"]:.0f}</b></span></div>')
+
+        focus_html = f'''
+  <section class="focus-sec">
+    <h2><span class="idx">07</span> 对你有什么用 · {esc(fc["label"])}</h2>
+    <div class="focus-tagline">{esc(fc.get("tagline", ""))}</div>
+    <div class="advice">{advice}</div>
+    <div class="signal-grid">{opp_c}{risk_c}{bench_c}{idea_c}</div>
+    <div class="fr-title">个人关注榜 · 按相关度排序</div>
+    <div class="focus-rank">{''.join(rank_rows)}</div>
+  </section>'''
+
     # --- 全量榜单 tabs ---
     tabs, panels = [], []
     for idx, pid in enumerate(plats):
@@ -440,8 +523,10 @@ def render(payload, out_dir, top=12, prev=None):
 
   {catwhy}
 
+  {focus_html}
+
   <section>
-    <h2><span class="idx">07</span> 全量榜单</h2>
+    <h2><span class="idx">08</span> 全量榜单</h2>
     <div class="tabs">{''.join(tabs)}</div>
     {''.join(panels)}
   </section>
@@ -585,7 +670,34 @@ def render_markdown(payload, out_dir, top=12):
         L.append("　".join(f"{w['word']}({w['count']})" for w in payload["hotwords"]))
         L.append("")
 
-    L.append("## 八、全量榜单")
+    fc = payload.get("focus")
+    if fc:
+        L.append(f"## 八、对你有什么用（{fc.get('label', '个人视角')}）")
+        L.append("")
+        for p in fc.get("advice", []):
+            L.append(f"- {p}")
+        L.append("")
+        for title, key in [("机会信号", "opportunities"), ("风险预警", "risks"),
+                           ("对标案例", "benchmarks"), ("可落地点子", "ideas")]:
+            items = fc.get(key, [])
+            L.append(f"**{title}**（{len(items)}）")
+            if items:
+                for it in items:
+                    sec = f"｜{it['sector']}" if it.get("sector") else ""
+                    L.append(f"- {it['title']}{sec}：{it['reason']}")
+            else:
+                L.append("- 今日暂无")
+            L.append("")
+        if fc.get("relevant"):
+            L.append("**个人关注榜**（按相关度排序）")
+            L.append("")
+            for i, it in enumerate(fc["relevant"], 1):
+                sig = ("｜" + "、".join(it["signals"])) if it.get("signals") else ""
+                sec = f"｜{it['sector']}" if it.get("sector") else ""
+                L.append(f"{i}. {it['title']}{sec}{sig}（相关度 {it['focus_score']:.0f}）")
+            L.append("")
+
+    L.append("## 九、全量榜单")
     L.append("")
     for pid in st["platforms"]:
         its = sorted([i for i in payload["items"] if i["platform"] == pid], key=lambda x: x["rank"])

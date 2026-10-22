@@ -123,6 +123,18 @@ def run(args):
     for i, c in enumerate(payload["clusters"][:5], 1):
         names = "/".join(PLATFORMS[x]["name"] for x in c["platforms"])
         print(f"  {i}. [{c['score']:>5.1f}] {c['title'][:34]}  ({c['category']} · {names})")
+
+    fc = payload.get("focus")
+    if fc:
+        print("\n  ── 对你有什么用（投资/理财/副业） ──")
+        for p in fc.get("advice", []):
+            print("  · " + p)
+        opp = fc.get("opportunities", [])
+        risk = fc.get("risks", [])
+        if opp:
+            print("  ▸ 机会：" + "；".join(c["title"][:20] for c in opp[:3]))
+        if risk:
+            print("  ▸ 风险：" + "；".join(c["title"][:20] for c in risk[:3]))
     print("\n  报告: " + os.path.relpath(html_path, ROOT))
     print("  摘要: " + os.path.relpath(md_path, ROOT))
     return 0
